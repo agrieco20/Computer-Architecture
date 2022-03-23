@@ -1,0 +1,187 @@
+﻿//Anthony Grieco
+//CS 220 Computer Architecture
+//Spring 2022
+//Description: This program uses Assembly Code through MARIE to replicate a Bubble Sort Algorithm
+Input
+Store listSize /Indicates user's list size
+Skipcond 800 /Verifies that number inputted is > 0 for the size of the user's list 
+Jump 0000 /User Validation; Jumps to first command in the program (Skipped if value is over 0)
+
+JnS LIST_APPEND /Adds inputted value(s) to the list at the allocated memory location
+
+JnS POINTER_RESET /Resets listPointer to start of the list
+
+/---
+Load listPointer_MAX //Resets the listSize variable to original value user entered (for the SWAP and SORT functions)
+Subt listPointer_MIN
+Add ONE
+Store listSize
+/---
+
+JnS BUBBLESORT /Sorts all the elements using a series of loops (uses the SWAP function)
+
+JnS LIST_OUTPUT /Outputs final list of numbers in numerical order
+
+Halt
+
+/-----------------
+POINTER_RESET, DEC 000 //Resets listPointer to start of the list
+Load listPointer_MIN
+Store listPointer
+JumpI POINTER_RESET
+
+/-----------------
+LIST_APPEND, DEC 000 //Adds inputted value(s) to the list at the allocated memory location
+appendLoop, Input /While Loop structure
+StoreI listPointer
+
+Load listSize 
+Subt ONE
+Store listSize
+
+Load listPointer /Increments pointer by 1 spot
+Add ONE
+Store listPointer
+
+Load listSize
+Skipcond 400
+Jump appendLoop
+
+Load listPointer /Sets maximum value in list ("listPointer_MAX")
+Subt ONE
+Store listPointer_MAX
+
+JnS POINTER_RESET /Resets listPointer to start of the list
+
+JumpI LIST_APPEND
+
+/-----------------
+COMPARE_ELEMENTS, DEC 000 //Takes a look at the two elements in question and determines which is greater (used only by the SWAP function)
+Load listPointer /Resets nextIndexPeek to index [listPointer + 1] in the list
+Add ONE
+Store nextIndexAddressPeek
+
+LoadI listPointer
+Store listPointerValue
+
+LoadI nextIndexAddressPeek
+Store nextIndexValuePeek
+
+Load listPointerValue /If value held by listPointerValue is greater, than its value is stored in greaterValueIndex (later used in the SWAP function)
+Subt nextIndexValuePeek
+Skipcond 000
+Jump listPointerGreater
+
+Load nextIndexValuePeek /If value held by nextIndexValuePeek is greater, than its value is stored in greaterValueIndex (later used in the SWAP function)
+Subt listPointerValue
+Skipcond 000
+Jump nextIndexPeekGreater
+
+Load listPointerValue /If values held by listPointerValue and nextIndexValuePeek are equal, than nextIndexValuePeek is stored in greaterValueIndex because this is already the later element in the list (later used in the SWAP function)
+Subt nextIndexValuePeek
+Skipcond 400
+Jump equalValues
+
+listPointerGreater, LoadI listPointer
+Store greaterValueIndex
+
+LoadI nextIndexAddressPeek
+Store smallerValueIndex
+Jump compareJump
+
+nextIndexPeekGreater, LoadI nextIndexAddressPeek
+Store greaterValueIndex
+
+LoadI listPointer
+Store smallerValueIndex
+Jump compareJump
+
+equalValues, LoadI nextIndexAddressPeek
+Store greaterValueIndex
+
+LoadI listPointer
+Store smallerValueIndex
+Jump compareJump
+
+compareJump, JumpI COMPARE_ELEMENTS
+
+/-----------------
+SWAP, DEC 000 //Swaps the elements if the former holds a higher numeric value than the later (uses the COMPARE_ELEMENTS function and only used by the BUBBLESORT function)
+JnS COMPARE_ELEMENTS /Takes a look at the two elements in question and determines which is greater (used only by the SWAP function)
+
+Load greaterValueIndex
+StoreI nextIndexAddressPeek
+
+Load smallerValueIndex
+StoreI listPointer
+
+JumpI SWAP
+
+/-----------------
+BUBBLESORT, DEC 000 //Sorts all the elements using a series of loops (uses the SWAP function)
+Load listSize /Reset
+Store sortLoopCounter2
+sortLoop2, Load sortLoopCounter2 /Begin Loop 2
+Subt ONE
+Store sortLoopCounter2
+
+Load listSize /Reset
+Subt ONE
+Store sortLoopCounter1
+
+JnS POINTER_RESET /Resets listPointer to start of the list
+
+sortLoop1, Load sortLoopCounter1 /Begin Loop 1
+Subt ONE
+Store sortLoopCounter1
+
+JnS SWAP /Swaps the elements if the former has a higher value than the later (uses the COMPARE_ELEMENTS function and only used by the BUBBLESORT function)
+Load listPointer
+Add ONE
+Store listPointer
+
+Load sortLoopCounter1
+Skipcond 400
+Jump sortLoop1 /End Loop 1
+
+Load sortLoopCounter2
+Skipcond 800
+JumpI BUBBLESORT
+
+Jump sortLoop2 /End Loop 2
+
+/-----------------
+LIST_OUTPUT, DEC 000 //Outputs final list of numbers in numerical order
+JnS POINTER_RESET /Resets listPointer to start of the list
+
+outputLoop, LoadI listPointer
+Output
+
+Load listPointer_MAX
+Subt listPointer
+Skipcond 800
+JumpI LIST_OUTPUT
+
+Load listPointer
+Add ONE
+Store listPointer
+Jump outputLoop
+
+/-----------------
+ONE, DEC 1
+listSize, DEC 0 /stores the number of values that the user wants to be calculated in their list
+listPointer, HEX 0F0 /Keeps track of the values in the list by having its address be updated by 1 whenever a value is added to the list or if a SWAP occurs (stores the memory address of the necessary value)
+listPointerValue, DEC 0 /Takes the numeric value being pointed to by listPointer and uses it for a numeric comparison with nextIndexValuePeek [by subtraction] (used in COMPARE_ELEMENTS function)
+listPointer_MIN, HEX 0F0 /Acts as a reset value for the listPointer variable for the begining of the list (stores the first memory location where a list item can be kept)
+listPointer_MAX, HEX 000 /Stores the last memory location in the list where the listPointer variable places the final item of the list
+nextIndexAddressPeek, HEX 000 /Looks at next value held in list (memory location) for comparison purposes (used in COMPARE_ELEMENTS function)
+nextIndexValuePeek, DEC 0 /Takes the numeric value being pointed to by nextIndexAddressPeek and uses it for a numeric comparison with listPointerValue [by subtraction] (used in COMPARE_ELEMENTS function)
+greaterValueIndex, HEX 000 /Stores numeric value; Used to indicate whether the value being pointed to by listPointer or nextIndexAddressPeek is greater in numeric value (Assigned in COMPARE_ELEMENTS, used in SWAP so that the greater element is placed after the lesser one after each comparison/swap)
+smallerValueIndex, HEX 000 /Stores numeric value; Temporarily stores the lesser value index established after the COMPARE_ELEMENTS function is completed
+sortLoopCounter1, DEC 0 /Set Equal to listSize - 1; Used in BUBBLESORT to increment through a makeshift for loop
+sortLoopCounter2, DEC 0 /Set Equal to listSize; Used in BUBBLESORT to increment through a makeshift for loop
+
+//REFERENCE PURPOSES ONLY:
+/Binary if Positive Value (AC > 0): 800
+/Binary if Equal to Zero Value (AC = 0): 400
+/Binary if Negative Value (AC < 0): 000
