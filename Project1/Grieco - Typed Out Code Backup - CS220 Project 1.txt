@@ -1,0 +1,66 @@
+//Anthony Grieco
+//CS 220 Computer Architecture
+//Spring 2022
+//Description: This program uses Assembly Code through MARIE to replicate the Fibonacci Sequence
+Input
+Store userInput
+Skipcond 800 /Verifies that number inputted is > 0
+Jump 0000 /User Validaition; Jumps to first command in the program (Skipped if value is over 0)
+
+///Increments through Fibonacci Sequence
+Load COUNTER /command 4
+
+Skipcond 800 /if COUNTER = 0, see command 9
+Jump 9 /to command 9 (Hex: 9)
+Skipcond 400 /if COUNTER = 1, see command 18
+Jump 12 /to command 18 (Hex: 12)
+
+//if COUNTER = 0, add firstIndexValue to currTotal, set value of firstIndexValue to new currTotal, and increment COUNTER by 1
+Load currTotal /command 9 (Hex: 9)
+Add firstIndexValue
+Store currTotal
+
+Load currTotal
+Store firstIndexValue
+
+Load COUNTER
+Add ONE
+Store COUNTER
+Jump 001A /to command 26: 001A)
+
+//if COUNTER = 1, add secondIndexValue to currTotal, set value of secondIndexValue to new currTotal, and decrease COUNTER by 1
+Load currTotal /command 18 (Hex: 12)
+Add secondIndexValue
+Store currTotal
+
+Load currTotal
+Store secondIndexValue
+
+Load COUNTER
+Subt ONE
+STORE COUNTER
+/Jump 001A /to command 26 (Hex: 001A)
+
+Load currTotal /command 26 (Hex: 001A)
+Output
+
+///Increments userValue towards Base Case
+Load userInput
+Subt ONE
+Store userInput
+Skipcond 400
+Jump 4 /Jumps to 5th overall command in program (first command is considered command "0")
+
+Halt
+
+ONE, DEC 1
+userInput, DEC 0 /"n"; stores the number of Fibonacci numbers the user wants calculated
+currTotal, DEC 0 /Used to record and output the next number in the Fibonacci Sequence
+firstIndexValue, DEC 1 /Used to alternate (with "secondIndexValue") and add previous values with "currTotal" so that the next number in the Fibonacci Sequence can be outputted
+secondIndexValue, DEC 0 /Used to alternate (with "firstIndexValue") and add previous values with "currTotal" so that the next number in the Fibonacci Sequence can be outputted
+COUNTER, DEC 0 /Device used to alternate between "firstIndexValue" and "secondIndexValue" (switches between 0 and 1)
+
+//REFERENCE PURPOSES ONLY:
+/Binary if Positive Value (AC > 0): 800
+/Binary if Equal to Zero Value (AC = 0): 400
+/Binary if Negative Value (AC < 0): 000
